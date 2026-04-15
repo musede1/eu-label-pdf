@@ -1,0 +1,4 @@
+xlwings>=0.30
+PyPDF2>=3.0
+fastapi>=0.110
+uvicorn[standard]>=0.27
