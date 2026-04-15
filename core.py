@@ -106,12 +106,16 @@ def fill_and_export_pdf(
             heights = {addr: sht.range(addr).row_height
                        for addr in ("B1", "B2", "B3")}
 
-            for addr, val in (("B1", product_name), ("B2", model),
-                              ("B3", batch_number)):
+            # B1 允许自动换行(长产品名分两行显示,模板预留 27pt 行高)
+            # B2/B3 关换行(单行内容,避免意外换行)
+            wrap_config = (("B1", product_name, True),
+                           ("B2", model, False),
+                           ("B3", batch_number, False))
+            for addr, val, wrap in wrap_config:
                 cell = sht.range(addr)
                 try:
                     cell.api.VerticalAlignment = XL_V_CENTER
-                    cell.api.WrapText = False
+                    cell.api.WrapText = wrap
                 except Exception:
                     pass
                 cell.value = val
