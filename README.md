@@ -6,7 +6,8 @@
 
 - Windows + 已安装 WPS(或 MS Excel)
 - Python 3.10+
-- 模板目录: `C:\Users\admin\Desktop\代码\模板\`(文件名格式 `欧代标签-*-{店铺简称}.xlsx`)
+- 模板目录: `./templates/`(随仓库走,文件名格式 `欧代标签-*-{店铺简称}.xlsx`)
+  换路径可设环境变量 `TEMPLATE_DIR` 覆盖
 
 ## 安装
 

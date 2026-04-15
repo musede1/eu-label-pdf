@@ -13,7 +13,9 @@ from PyPDF2 import PdfReader, PdfWriter
 
 log = logging.getLogger(__name__)
 
-TEMPLATE_DIR = Path(r"C:\Users\admin\Desktop\代码\模板")
+import os
+_DEFAULT_TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
+TEMPLATE_DIR = Path(os.environ.get("TEMPLATE_DIR", str(_DEFAULT_TEMPLATE_DIR)))
 
 # 裁剪参数(mm)
 CROP_LEFT_MM = 35.2

@@ -7,13 +7,13 @@ from pathlib import Path
 import xlwings as xw
 from PyPDF2 import PdfReader, PdfWriter
 
+from core import TEMPLATE_DIR
+
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
-
-TEMPLATE_DIR = Path(r"C:\Users\admin\Desktop\代码\模板")
 OUTPUT_DIR = Path(r"C:\Users\admin\Desktop\代码\输出\batch_test")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -9,7 +9,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     except Exception:
         pass
 
-TEMPLATE = Path(r"C:\Users\admin\Desktop\代码\模板\欧代标签-爱斯海-103.xlsx")
+from core import TEMPLATE_DIR
+TEMPLATE = TEMPLATE_DIR / "欧代标签-爱斯海-103.xlsx"
 
 # xlVAlign 枚举
 V_ALIGN = {-4160: "xlTop", -4108: "xlCenter", -4107: "xlBottom",
