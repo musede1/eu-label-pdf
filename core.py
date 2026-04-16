@@ -29,6 +29,10 @@ XL_V_CENTER = -4108  # xlVAlign.xlCenter
 UNIFIED_FONT_NAME = "宋体"
 UNIFIED_FONT_SIZE = 11
 
+# 以 123 模板为标准的行高(B1 预留 2 行空间)
+STD_ROW_HEIGHTS = {1: 27.0, 2: 18.0, 3: 18.0}
+STD_B_COL_WIDTH = 46.51
+
 # 常驻 WPS/Excel 实例,避免每次请求冷启动(省 1-3 秒)
 _APP: Optional[xw.App] = None
 _APP_LOCK = threading.Lock()
@@ -107,8 +111,9 @@ def fill_and_export_pdf(
         wb = app.books.open(str(template))
         try:
             sht = wb.sheets[0]
-            heights = {addr: sht.range(addr).row_height
-                       for addr in ("B1", "B2", "B3")}
+            # 强制统一 B 列宽和行高,以 123 模板为标准
+            if abs(sht.range("B1").column_width - STD_B_COL_WIDTH) > 0.5:
+                sht.range("B1").column_width = STD_B_COL_WIDTH
 
             # B1 允许自动换行(长产品名分两行显示,模板预留 27pt 行高)
             # B2/B3 关换行(单行内容,避免意外换行)
@@ -117,11 +122,14 @@ def fill_and_export_pdf(
                            ("B3", batch_number, False))
             for addr, val, wrap in wrap_config:
                 cell = sht.range(addr)
+                label_cell = sht.range(f"A{cell.row}")
                 # 先写值(写值会重置一些格式)
                 cell.value = val
                 # 再统一设置:对齐、换行、字体。分开 try,方便排错
                 try:
                     cell.api.VerticalAlignment = XL_V_CENTER
+                    # 标签列(A)也强制居中,避免模板间 xlTop/xlCenter 不一致导致错位
+                    label_cell.api.VerticalAlignment = XL_V_CENTER
                 except Exception as e:
                     log.warning(f"{addr} set VerticalAlignment failed: {e}")
                 try:
@@ -134,8 +142,9 @@ def fill_and_export_pdf(
                 except Exception as e:
                     log.warning(f"{addr} set Font failed: {e}")
 
-            for addr, h in heights.items():
-                sht.range(addr).row_height = h
+            # 强制标准行高(以 123 为准),不管模板原始值
+            for row_num, std_h in STD_ROW_HEIGHTS.items():
+                sht.range(f"B{row_num}").row_height = std_h
 
             sht.to_pdf(str(pdf_path))
         finally:
