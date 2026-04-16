@@ -25,6 +25,10 @@ CROP_BOTTOM_MM = 80.2
 
 XL_V_CENTER = -4108  # xlVAlign.xlCenter
 
+# 统一字体/字号,避免模板间差异(如 PMingLiU-ExtB 渲染英文不全)
+UNIFIED_FONT_NAME = "宋体"
+UNIFIED_FONT_SIZE = 11
+
 # 常驻 WPS/Excel 实例,避免每次请求冷启动(省 1-3 秒)
 _APP: Optional[xw.App] = None
 _APP_LOCK = threading.Lock()
@@ -113,12 +117,22 @@ def fill_and_export_pdf(
                            ("B3", batch_number, False))
             for addr, val, wrap in wrap_config:
                 cell = sht.range(addr)
+                # 先写值(写值会重置一些格式)
+                cell.value = val
+                # 再统一设置:对齐、换行、字体。分开 try,方便排错
                 try:
                     cell.api.VerticalAlignment = XL_V_CENTER
+                except Exception as e:
+                    log.warning(f"{addr} set VerticalAlignment failed: {e}")
+                try:
                     cell.api.WrapText = wrap
-                except Exception:
-                    pass
-                cell.value = val
+                except Exception as e:
+                    log.warning(f"{addr} set WrapText failed: {e}")
+                try:
+                    cell.api.Font.Name = UNIFIED_FONT_NAME
+                    cell.api.Font.Size = UNIFIED_FONT_SIZE
+                except Exception as e:
+                    log.warning(f"{addr} set Font failed: {e}")
 
             for addr, h in heights.items():
                 sht.range(addr).row_height = h
